@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import jwt
-from flaskblog import db, login_manager, app #admin
+from flask import current_app
+from flaskblog import db, login_manager #admin
 from flask_login import UserMixin
 #from flask_admin.contrib.sqla import ModelView
 
@@ -22,17 +23,17 @@ class User(db.Model, UserMixin): # Usermixin is provided by flask_login extensio
     def get_reset_token(self):
         payload = {
             'sub': self.id,
-            'iss': app.config['SECRET_KEY'],
+            'iss': current_app.config['SECRET_KEY'],
             'exp': datetime.utcnow() + timedelta(minutes=30)
         }
-        secret_key = app.config['SECRET_KEY']
+        secret_key = current_app.config['SECRET_KEY']
         token = jwt.encode(payload, secret_key, algorithm='HS256')
         return token
     
     @staticmethod
     def verify_reset_token(token):
         try:
-            secret_key = app.config['SECRET_KEY']
+            secret_key = current_app.config['SECRET_KEY']
             payload = jwt.decode(token, secret_key, algorithms=['HS256'])
            
             # Verify the 'iss' (issuer) claim
